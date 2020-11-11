@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket IO page</title>
+  </head>
+  <body>
+   
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      
+      socket.on("welcome", function(data) {
+        alert(data);
+      })
+    </script>
+  </body>
+</html>
