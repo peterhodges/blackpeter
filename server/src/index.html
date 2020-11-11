@@ -4,14 +4,18 @@
     <title>Socket IO page</title>
   </head>
   <body>
-   
+
+    <div id="message-container" style="border: 1px solid red"></div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
       
-      socket.on("welcome", function(data) {
-        alert(data);
-      })
+      socket.on("message", function(message) {
+          var container = document.querySelector('#message-container');
+          container.innerHTML = container.innerHTML + "<br/>" + message;
+      });
+
     </script>
   </body>
 </html>
