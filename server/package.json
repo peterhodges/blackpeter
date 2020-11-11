@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node-dev index.ts",
+    "build": ""
   },
   "repository": {
     "type": "git",
@@ -16,10 +17,6 @@
     "url": "https://github.com/peterhodges/blackpeter/issues"
   },
   "homepage": "https://github.com/peterhodges/blackpeter#readme",
-  "scripts": {
-    "start": "ts-node-dev index.ts",
-    "build": ""
-  },
   "dependencies": {
     "ts-node": "^9.0.0",
     "typescript": "^4.0.5"
