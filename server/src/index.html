@@ -9,11 +9,11 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io();
+      var socket = io('http://localhost:3000');
       
-      socket.on("message", function(message) {
+      socket.on("newState", function(message) {
           var container = document.querySelector('#message-container');
-          container.innerHTML = container.innerHTML + "<br/>" + message;
+          container.innerHTML = JSON.stringify(message);
       });
 
     </script>

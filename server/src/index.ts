@@ -1,34 +1,38 @@
 import * as http from 'http';
-import * as fs from 'fs'
 import { Socket } from 'socket.io';
+import { Game, GameState } from './Game';
 
-const app = http.createServer(handler);
-const io = require('socket.io')(app);
-
-function handler (req: http.IncomingMessage, res: http.ServerResponse) {
-    fs.readFile(__dirname + '/index.html', (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        return res.end('Error loading index.html');
-      }
-
-      res.writeHead(200);
-      res.end(data);
-    });
-}
+const app = http.createServer();
+const io = require('socket.io')(app, {
+  cors: {
+    origin: "*",
+  }
+});
 
 io.on('connection', (socket: Socket) => {
     console.log('user connected');
+    let state;
 
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-      });
+    // todo: Ensure game isn't created if it already exists
 
-      setTimeout(() => {
-        socket.emit("message", "This is a chat message from the server.");
-      }, 1000)
+    console.log("creating game");
+    state = Game.create("24024242");
+    state = Game.addPlayer(state, "Peter Hodges"); 
+    state = Game.addPlayer(state, "Kata Lajko"); 
+    state = Game.start(state);
+
+    pushState(state);
+    
+    socket.on('disconnect', () => console.log('user disconnected'));
+    socket.on("action", message => {
+      
+    });
     
 
+    function pushState(state: GameState) {
+      socket.emit("newState", state);
+      console.log(state); // for debugging
+    }
 });
 
 app.listen(3000, () => { console.log('Listening on port 3000')});

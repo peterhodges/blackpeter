@@ -23,6 +23,9 @@
     "typescript": "^4.0.5"
   },
   "devDependencies": {
+    "@types/component-emitter": "^1.2.10",
+    "@types/cookie": "^0.4.0",
+    "@types/cors": "^2.8.8",
     "ts-node-dev": "^1.0.0"
   }
 }
