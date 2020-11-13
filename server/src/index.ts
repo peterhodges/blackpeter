@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Socket } from 'socket.io';
-import { Game, GameState } from './Game';
+import { Game, GameState, PendingGameState } from './Game';
 
 const app = http.createServer();
 const io = require('socket.io')(app, {
@@ -11,7 +11,7 @@ const io = require('socket.io')(app, {
 
 io.on('connection', (socket: Socket) => {
     console.log('user connected');
-    let state;
+    let state: any;
 
     // todo: Ensure game isn't created if it already exists
 
@@ -25,18 +25,20 @@ io.on('connection', (socket: Socket) => {
     pushState(state);
     
     socket.on('disconnect', () => console.log('user disconnected'));
-    socket.on("action", message => {
-      switch(message.type) {
+    socket.on("action", action => {
+      switch(action.type) {
         case "SELECT_CARD":
-          console.log(message);
+          state = Game.takeCard(state, action.player, action.card);
+          pushState(state);
           break;
       }
     });
     
 
     function pushState(state: GameState) {
+      console.log("Pushing new state from server");
       socket.emit("newState", state);
-      console.log(state); // for debugging
+      // console.log(state); // for debugging
     }
 });
 

@@ -11,6 +11,7 @@ function Game() {
 
     useEffect(() => {
         socket.on("newState", (data: GameState) => {
+            console.log("New state from server: ", data);
             setGame(data);
         });
         return () => socket.close();

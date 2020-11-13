@@ -99,7 +99,39 @@ export const Game = {
         return newState;
     },
 
-    takeCard: (state: GameState, player: Player) =>  {
+    takeCard: (state: GameState, player: Player, card: Card) =>  {
+        console.log("taking card", player, card);
+
+        // Get first letter of card
+        const cardLetter = Card[card][0];
+
+        // Find all cards with same first letter (including provided card)
+        let matchingCards: Card[] = [];
+        player.cards.forEach(playerCard => {
+            const playerCardLetter = Card[playerCard][0];
+            if(playerCardLetter === cardLetter) {
+                matchingCards.push(playerCard);
+            };
+        });
+
+        if(matchingCards.length === 2) {
+            return {
+                ...state,
+                players: state.players.map(p => {
+                    if(p.name === player.name) {
+                        // modify player cards
+                        return {
+                            ...p,
+                            cards: p.cards.filter(c => matchingCards.indexOf(c) === -1)
+                        }
+                    }
+                    else { return p; }
+                })
+            }
+        }
+        
+        console.log("found card", matchingCards);
+
         // check for winner
     },
 
