@@ -5,7 +5,10 @@ import React, { useEffect, useState } from 'react';
 import socketIOClient from 'socket.io-client';
 
 function App() {
-  const [state, setState] = useState({} as GameState);
+
+  // todo: Can we _not_ set state until it's available from the socket?
+  // Setting it to {} first means <Game/> has to check that properties exist
+  const [state, setState] = useState<GameState>();
 
   useEffect(() => {
     // @ts-ignore
