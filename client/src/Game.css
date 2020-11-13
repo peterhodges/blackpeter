@@ -1,0 +1,4 @@
+.game__players {
+    display: flex;
+    flex-direction: row;
+}

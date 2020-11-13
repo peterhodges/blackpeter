@@ -19,13 +19,18 @@ io.on('connection', (socket: Socket) => {
     state = Game.create("24024242");
     state = Game.addPlayer(state, "Peter Hodges"); 
     state = Game.addPlayer(state, "Kata Lajko"); 
+    state = Game.addPlayer(state, "Max McLeod");
     state = Game.start(state);
 
     pushState(state);
     
     socket.on('disconnect', () => console.log('user disconnected'));
     socket.on("action", message => {
-      
+      switch(message.type) {
+        case "SELECT_CARD":
+          console.log(message);
+          break;
+      }
     });
     
 

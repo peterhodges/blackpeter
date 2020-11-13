@@ -1,27 +1,52 @@
-import React from 'react';
-import { GameState } from './../../server/src/Game';
+import React, { useState, useEffect } from 'react';
+import { GameState, Card as ICard, Player as IPlayer } from './../../server/src/Game';
+import socketIOClient from 'socket.io-client';
+import Player from './Player';
+import './Game.css';
 
-interface Props {
-    game?: GameState
-}
+function Game() {
+    const [game, setGame] = useState<GameState>();
+    // @ts-ignore
+    const socket = socketIOClient("http://localhost:3000");
 
-function Game({game}: Props) {
+    useEffect(() => {
+        socket.on("newState", (data: GameState) => {
+            setGame(data);
+        });
+        return () => socket.close();
+    }, []);
+
+
+    function selectCard(card: ICard, player: IPlayer) {
+        console.log("EMIT: SELECT_CARD");
+        socket.emit("action", {
+            type: "SELECT_CARD",
+            card: card,
+            player: player,
+        });
+    }
+
+    function isTurn(player: IPlayer) {
+        if(!game) return false;
+        return game.turn && player.name === game.turn.name;
+    }
+
     if(game) {
         return (
-            <div>
-                {game.players.map(player => {
-                    return (
-                        <div className='player'>
-                            <span>{player.name}: </span>
-                            <span>{JSON.stringify(player.cards)}</span>
-                            <br/>
-                        </div>
-                    )
-                })}
+            <div className="game">
+                <h1>Black Peter</h1>
+                <div className="game__players">
+                    {game.players.map(player => {
+                        return (
+                            <Player player={player} turn={isTurn(player)} selectCardFromPlayer={selectCard} />
+                        )
+                    })}
+                </div>
             </div>
+            
         );
     } else {
-        return (<div></div>);
+        return (<div>Loading game...</div>);
     }
 }
     
