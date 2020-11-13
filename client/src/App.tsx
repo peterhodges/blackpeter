@@ -5,14 +5,14 @@ import React, { useEffect, useState } from 'react';
 import socketIOClient from 'socket.io-client';
 
 function App() {
-  const [state, setState] = useState("");
+  const [state, setState] = useState({} as GameState);
 
   useEffect(() => {
     // @ts-ignore
     const socket = socketIOClient("http://localhost:3000");
 
     socket.on("newState", (data: GameState) => {
-      setState(JSON.stringify(data));
+      setState(data);
     });
 
     return () => socket.close();
@@ -20,8 +20,7 @@ function App() {
 
   return (
     <div>
-      <Game />
-      <p>State: {state}</p>
+      <Game game={state} />
     </div>
   );
 }
