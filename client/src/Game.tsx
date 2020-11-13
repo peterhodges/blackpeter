@@ -28,7 +28,7 @@ function Game() {
 
     function isTurn(player: IPlayer) {
         if(!game) return false;
-        return game.turn && player.name === game.turn.name;
+        return player.name === game.turn.name;
     }
 
     if(game) {

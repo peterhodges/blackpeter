@@ -19,7 +19,7 @@ function Player({player, turn, selectCardFromPlayer}: Props) {
         <div className={turn ? 'player player--turn' : 'player'}>
             <div className='player__name'>{player.name}</div>
             <div className='player__cards'>
-                {player.cards ? player.cards.map(card => <Card card={card} selectCard={selectCard} />) : "No cards"}
+                {player.cards.map(card => <Card card={card} selectCard={selectCard} />)}
             </div>
         </div>
     )

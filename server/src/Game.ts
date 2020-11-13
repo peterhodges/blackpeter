@@ -14,14 +14,23 @@ export const Deck: Card[] = [
 
 export interface Player {
     name: string;
-    cards?: Card[];
+    cards: Card[];
+}
+
+export interface PendingPlayer {
+    name: string;
 }
 
 export interface GameState {
     id: string;
     started: boolean;
-    turn: Player | false;
+    turn: Player;
     players: Player[];
+}
+
+export interface PendingGameState {
+    id: string;
+    players: PendingPlayer[];
 }
 
 // todo: Have a separate StagingGame and Game type so we don't have to check for undefined everwhere
@@ -40,45 +49,54 @@ const shuffle = (array: any) => {
 }
 
 export const Game = {
-    create: (id: string): GameState => {
+    create: (id: string): PendingGameState => {
         return {
             id,
             players: [],
-            started: false,
-            turn: false,
         }
     },
 
-    addPlayer: (state: GameState, name: string): GameState => {
-        if(state.started) throw "Game is already started";
+    addPlayer: (state: PendingGameState, name: string): PendingGameState => {
         return {
             ...state,
             players: [
                 ...state.players,
                 {
                     name,
-                    cards: [],
                 }
             ]
         }
     },
 
-    start: (state: GameState): GameState => {
-        if(state.started) throw new Error("Game is already started");
+    start: (state: PendingGameState): GameState => {
         if(state.players.length < 2) throw new Error("2 players minimum");
+
+        // Create new GameState
+        let newState = <GameState>{};
+
+        const initCards = (player:PendingPlayer): Player => {
+            return {
+                ...player,
+                cards: []
+            }
+        }
+
+        newState = {
+            ...state,
+            started: true,
+            players: state.players.map(player => initCards(player)),
+            turn: initCards(state.players[0]),
+        }
+
 
         // @ts-ignore
         // todo: look at this TS issue
         let deck = [].concat(Deck);
         shuffle(deck);
 
-        state = dealCards(state, deck);
+        newState = dealCards(newState, deck);
 
-        return {
-            ...state,
-            started: true,
-            turn: state.players[0],
-        }
+        return newState;
     },
 
     takeCard: (state: GameState, player: Player) =>  {
@@ -94,6 +112,7 @@ export const Game = {
 function dealCards(state: GameState, deck: Card[]): GameState {
     let deckIndex = 0;
     let playerIndex = 0;
+
     while(true) {
         // Deal first card to player at index
         state.players[playerIndex] = {
