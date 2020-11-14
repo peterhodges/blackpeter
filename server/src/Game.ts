@@ -100,14 +100,18 @@ export const Game = {
     },
 
     selectCard: (state: GameState, player: Player, card: Card) =>  {
+        
+        // todo: Support player turns
+
         if(player.name === state.turn.name) {
             // Player selecting own cards
             const newState = layCard(state, player, card);
             if(newState) return newState;
         } 
-        // else {
-            // return selectOpponentCard(state, player, card);
-        // }
+        else {
+            const newState = selectOpponentCard(state, player, card);
+            if(newState) return newState;
+        }
 
         // check for winner
         // next turn
@@ -138,6 +142,7 @@ function dealCards(state: GameState, deck: Card[]): GameState {
 
 function layCard(state: GameState, player: Player, card: Card) {
     // todo: Place cards in "playedCards" array for user
+    if(card === Card.BP) return false;
 
     // Get first letter of card
     const cardLetter = Card[card][0];
@@ -164,10 +169,35 @@ function layCard(state: GameState, player: Player, card: Card) {
                 }
                 else { return p; }
             })
-        }
+        };
     } 
 }
 
 function selectOpponentCard(state: GameState, player: Player, card: Card) {
-    return {...state};
+    // game.turn.name is current player
+    // player is player who's card has been selected
+
+    return {
+        ...state,
+        players: state.players.map(p => {
+            // Remove card from selected player
+            if(p.name === player.name) {
+                return {
+                    ...p,
+                    cards: p.cards.filter(c => c !== card),
+                }
+            }
+            // Add card to turn player
+            if(p.name === state.turn.name) {
+                return {
+                    ...p,
+                    cards: [...p.cards, card],
+                }
+            }
+            else { return p; }
+        })
+    };
+
+
+    //return {...state};
 }
