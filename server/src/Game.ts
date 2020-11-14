@@ -99,44 +99,18 @@ export const Game = {
         return newState;
     },
 
-    takeCard: (state: GameState, player: Player, card: Card) =>  {
-        console.log("taking card", player, card);
-
-        // Get first letter of card
-        const cardLetter = Card[card][0];
-
-        // Find all cards with same first letter (including provided card)
-        let matchingCards: Card[] = [];
-        player.cards.forEach(playerCard => {
-            const playerCardLetter = Card[playerCard][0];
-            if(playerCardLetter === cardLetter) {
-                matchingCards.push(playerCard);
-            };
-        });
-
-        if(matchingCards.length === 2) {
-            return {
-                ...state,
-                players: state.players.map(p => {
-                    if(p.name === player.name) {
-                        // modify player cards
-                        return {
-                            ...p,
-                            cards: p.cards.filter(c => matchingCards.indexOf(c) === -1)
-                        }
-                    }
-                    else { return p; }
-                })
-            }
-        }
-        
-        console.log("found card", matchingCards);
+    selectCard: (state: GameState, player: Player, card: Card) =>  {
+        if(player.name === state.turn.name) {
+            // Player selecting own cards
+            const newState = layCard(state, player, card);
+            if(newState) return newState;
+        } 
+        // else {
+            // return selectOpponentCard(state, player, card);
+        // }
 
         // check for winner
-    },
-
-    layPair: (state: GameState, card: Card) => {
-        // check for winner
+        // next turn
     },
 
 }
@@ -160,4 +134,40 @@ function dealCards(state: GameState, deck: Card[]): GameState {
 
         if(deckIndex === deck.length) return state;
     };
+}
+
+function layCard(state: GameState, player: Player, card: Card) {
+    // todo: Place cards in "playedCards" array for user
+
+    // Get first letter of card
+    const cardLetter = Card[card][0];
+
+    // Find all cards with same first letter (including provided card)
+    let matchingCards: Card[] = [];
+    player.cards.forEach(playerCard => {
+        const playerCardLetter = Card[playerCard][0];
+        if(playerCardLetter === cardLetter) {
+            matchingCards.push(playerCard);
+        };
+    });
+
+    // Remove any pairs from user
+    if(matchingCards.length === 2) {
+        return {
+            ...state,
+            players: state.players.map(p => {
+                if(p.name === player.name) {
+                    return {
+                        ...p,
+                        cards: p.cards.filter(c => matchingCards.indexOf(c) === -1)
+                    }
+                }
+                else { return p; }
+            })
+        }
+    } 
+}
+
+function selectOpponentCard(state: GameState, player: Player, card: Card) {
+    return {...state};
 }

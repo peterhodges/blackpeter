@@ -28,8 +28,11 @@ io.on('connection', (socket: Socket) => {
     socket.on("action", action => {
       switch(action.type) {
         case "SELECT_CARD":
-          state = Game.takeCard(state, action.player, action.card);
-          pushState(state);
+          const newState = Game.selectCard(state, action.player, action.card);
+          if(newState) {
+            state = newState;
+            pushState(state);
+          }
           break;
       }
     });
@@ -37,7 +40,7 @@ io.on('connection', (socket: Socket) => {
 
     function pushState(state: GameState) {
       console.log("Pushing new state from server");
-      socket.emit("newState", state);
+      io.emit("newState", state);
       // console.log(state); // for debugging
     }
 });
