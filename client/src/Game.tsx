@@ -9,17 +9,13 @@ const socket = socketIOClient("http://localhost:3000");
 function Game() {
     const [game, setGame] = useState<GameState>();
 
-    const newStateHandler = (data: GameState) => {
-        console.log("New state from server: ", data);
-        setGame(data);
-    };
+    const newStateHandler = (data: GameState) => setGame(data);
     useEffect(() => {
         socket.on("newState", newStateHandler);
         return () => socket.off("newState", newStateHandler);
     }, []);
 
     function selectCard(card: ICard, player: IPlayer) {
-        console.log("EMIT: SELECT_CARD");
         socket.emit("action", {
             type: "SELECT_CARD",
             card: card,
