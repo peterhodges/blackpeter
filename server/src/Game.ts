@@ -35,7 +35,8 @@ export interface PendingGameState {
 
 // todo: Have a separate StagingGame and Game type so we don't have to check for undefined everwhere
 
-const shuffle = (array: any) => {
+const shuffle = (array: any): any => {
+    const a = [...array];
     var i = 0
         , j = 0
         , temp = null
@@ -46,6 +47,7 @@ const shuffle = (array: any) => {
         array[i] = array[j]
         array[j] = temp
     }   
+    return a;
 }
 
 export const Game = {
@@ -88,13 +90,7 @@ export const Game = {
             turn: initCards(state.players[0]),
         }
 
-
-        // @ts-ignore
-        // todo: look at this TS issue
-        let deck = [].concat(Deck);
-        shuffle(deck);
-
-        newState = dealCards(newState, deck);
+        newState = dealCards(newState, shuffle(Deck));
 
         return newState;
     },
@@ -174,9 +170,6 @@ function layCard(state: GameState, player: Player, card: Card) {
 }
 
 function selectOpponentCard(state: GameState, player: Player, card: Card) {
-    // game.turn.name is current player
-    // player is player who's card has been selected
-
     return {
         ...state,
         players: state.players.map(p => {
@@ -197,7 +190,4 @@ function selectOpponentCard(state: GameState, player: Player, card: Card) {
             else { return p; }
         })
     };
-
-
-    //return {...state};
 }
