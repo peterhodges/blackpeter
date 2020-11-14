@@ -33,8 +33,6 @@ export interface PendingGameState {
     players: PendingPlayer[];
 }
 
-// todo: Have a separate StagingGame and Game type so we don't have to check for undefined everwhere
-
 const shuffle = (array: any): any => {
     const a = [...array];
     var i = 0
