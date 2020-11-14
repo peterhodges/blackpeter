@@ -3,20 +3,20 @@ import { GameState, Card as ICard, Player as IPlayer } from './../../server/src/
 import socketIOClient from 'socket.io-client';
 import Player from './Player';
 import './Game.css';
+// @ts-ignore
+const socket = socketIOClient("http://localhost:3000");
 
 function Game() {
     const [game, setGame] = useState<GameState>();
-    // @ts-ignore
-    const socket = socketIOClient("http://localhost:3000");
 
+    const newStateHandler = (data: GameState) => {
+        console.log("New state from server: ", data);
+        setGame(data);
+    };
     useEffect(() => {
-        socket.on("newState", (data: GameState) => {
-            console.log("New state from server: ", data);
-            setGame(data);
-        });
-        return () => socket.close();
+        socket.on("newState", newStateHandler);
+        return () => socket.off("newState", newStateHandler);
     }, []);
-
 
     function selectCard(card: ICard, player: IPlayer) {
         console.log("EMIT: SELECT_CARD");
