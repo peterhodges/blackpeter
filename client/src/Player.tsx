@@ -17,9 +17,9 @@ function Player({player, turn, selectCardFromPlayer}: Props) {
 
     return (
         <div className={turn ? 'player player--turn' : 'player'}>
-            <div className='player__name'>{player.name}</div>
+            <div className='player__name'>{player.id}: {player.name}</div>
             <div className='player__cards'>
-                {player.cards.map(card => <Card card={card} selectCard={selectCard} />)}
+                {player.cards.map(card => <Card key={card} card={card} selectCard={selectCard} />)}
             </div>
         </div>
     )

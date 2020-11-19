@@ -29,19 +29,23 @@ function Game() {
     }
 
     if(game) {
-        return (
-            <div className="game">
-                <h1>Black Peter</h1>
-                <div className="game__players">
-                    {game.players.map(player => {
-                        return (
-                            <Player player={player} turn={isTurn(player)} selectCardFromPlayer={selectCard} />
-                        )
-                    })}
+        if(game.winner) {
+            return (<div>WINNER: <Player player={game.winner} turn={false} /></div>);
+        } else {
+            return (
+                <div className="game">
+                    <h1>Black Peter</h1>
+                    <div className="game__players">
+                        {game.players.map(player => {
+                            return (
+                                <Player player={player} key={player.id} turn={isTurn(player)} selectCardFromPlayer={selectCard} />
+                            )
+                        })}
+                    </div>
                 </div>
-            </div>
-            
-        );
+                
+            );
+        }
     } else {
         return (<div>Loading game...</div>);
     }
