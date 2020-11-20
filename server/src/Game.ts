@@ -1,5 +1,3 @@
-import { convertTypeAcquisitionFromJson, hasOnlyExpressionInitializer, textChangeRangeIsUnchanged } from "typescript";
-
 export enum CardType { A, B, C, D, E, F, BP};
 export enum CardId { A1, A2, B1, B2, C1, C2, D1, D2, E1, E2, F1, F2, BP};
 export interface Card {
