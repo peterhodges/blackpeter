@@ -2,6 +2,9 @@ import React, {useEffect, useState} from 'react';
 import { Card as ICard } from './../../server/src/Game';
 import './Card.css';
 
+// todo: Cannot import Game (for CardType enum) with current project dir structure
+enum CardType { A, B, C, D, E, F, BP};
+
 interface Props {
     card: ICard;
     selectCard?: (card: ICard) => void;
@@ -12,32 +15,26 @@ function Card({card, selectCard}: Props) {
     const [displayCard, setDisplayCard] = useState("");
     
     useEffect(() => {
-        switch(card) {
-            case 0:
-            case 1:
+        switch(card.type) {
+            case CardType.A:
                 setDisplayCard("A");
                 break;
-            case 2:
-            case 3:
+            case CardType.B:
                 setDisplayCard("B");
                 break;
-            case 4:
-            case 5:
+            case CardType.C:
                 setDisplayCard("C");
                 break;
-            case 6:
-            case 7:
+            case CardType.D:
                 setDisplayCard("D");
                 break;
-            case 8:
-            case 9:
+            case CardType.E:
                 setDisplayCard("E");
                 break;
-            case 10:
-            case 11:
+            case CardType.F:
                 setDisplayCard("F");
                 break;
-            case 12:
+            case CardType.BP:
                 setDisplayCard("BP");
                 break;
         }

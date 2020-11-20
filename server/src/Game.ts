@@ -1,18 +1,28 @@
 import { convertTypeAcquisitionFromJson, hasOnlyExpressionInitializer, textChangeRangeIsUnchanged } from "typescript";
 
-export enum Card {
-    "A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "E1", "E2", "F1", "F2", "BP"
+export enum CardType { A, B, C, D, E, F, BP};
+export enum CardId { A1, A2, B1, B2, C1, C2, D1, D2, E1, E2, F1, F2, BP};
+export interface Card {
+    type: CardType;
+    id: CardId;
 }
 
-export const Deck: Card[] = [
-    Card.A1, Card.A2, 
-    Card.B1, Card.B2, 
-    Card.C1, Card.C2, 
-    Card.D1, Card.D2,
-    Card.E1, Card.E2,
-    Card.F1, Card.F2,
-    Card.BP
-];
+const Deck: Card[] = [
+    { type: CardType.A, id: CardId.A1 },
+    { type: CardType.A, id: CardId.A2 },
+    { type: CardType.B, id: CardId.B1 },
+    { type: CardType.B, id: CardId.B2 },
+    { type: CardType.C, id: CardId.C1 },
+    { type: CardType.C, id: CardId.C2 },
+    { type: CardType.D, id: CardId.D1 },
+    { type: CardType.D, id: CardId.D2 },
+    { type: CardType.E, id: CardId.E1 },
+    { type: CardType.E, id: CardId.E2 },
+    { type: CardType.F, id: CardId.F1 },
+    { type: CardType.F, id: CardId.F2 },
+    { type: CardType.BP, id: CardId.BP},
+]
+
 
 export interface Player {
     id: number;
@@ -80,7 +90,6 @@ export const Game = {
         }
 
         newState = dealCards(newState, shuffle(Deck));
-
         return newState;
     },
 
@@ -88,7 +97,7 @@ export const Game = {
         
         // todo: Support player turns
         // todo: ensure it only pushes states when actually required (fns should return falsy)
-        if(player.name === state.turn.name) {
+        if(player.id === state.turn.id) {
             // Player selecting own cards
             const newState = layCard(state, player, card);
             if(newState) return checkWinner(checkTurn(newState));
@@ -121,37 +130,24 @@ function dealCards(state: GameState, deck: Card[]): GameState {
 }
 
 function layCard(state: GameState, player: Player, card: Card): GameState|false {
-    // todo: Place cards in "playedCards" array for user
-    if(card === Card.BP) return false;
+    if(card.type === CardType.BP) return false;
 
-    // Get first letter of card
-    const cardLetter = Card[card][0];
-
-    // Find all cards with same first letter (including provided card)
-    let matchingCards: Card[] = [];
-    player.cards.forEach(playerCard => {
-        const playerCardLetter = Card[playerCard][0];
-        if(playerCardLetter === cardLetter) {
-            matchingCards.push(playerCard);
-        };
-    });
-
-    // Remove any pairs from user
-    if(matchingCards.length === 2) {
+    const matching = player.cards.filter((playerCard => playerCard.type === card.type));
+    const rest = player.cards.filter(playerCard => playerCard.type !== card.type);
+    if(matching.length === 2) {
         return {
             ...state,
             players: state.players.map(p => {
-                if(p.name === player.name) {
+                if(p.id === player.id) {
                     return {
                         ...p,
-                        cards: p.cards.filter(c => matchingCards.indexOf(c) === -1)
+                        cards: rest,
                     }
                 }
                 else { return p; }
             }),
         };
-    } 
-
+    }
     return false;
 }
 
@@ -166,10 +162,10 @@ function selectOpponentCard(state: GameState, player: Player, card: Card) {
         },
         players: state.players.map(p => {
             // Remove card from selected player
-            if(p.name === player.name) {
+            if(p.id === player.id) {
                 return {
                     ...p,
-                    cards: p.cards.filter(c => c !== card),
+                    cards: p.cards.filter(c => c.id !== card.id),
                 }
             }
             // Add card to turn player
@@ -226,7 +222,7 @@ function checkWinner(state: GameState): GameState {
             // At least one person has multiple cards - game is not won
             return state;
         }
-        if(player.cards.length === 1 && player.cards[0] === Card.BP) {
+        if(player.cards.length === 1 && player.cards[0].type === CardType.BP) {
             winner = player;
         }
     }
