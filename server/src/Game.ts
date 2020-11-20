@@ -100,11 +100,11 @@ export const Game = {
         if(player.id === state.turn.id) {
             // Player selecting own cards
             const newState = layCard(state, player, card);
-            if(newState) return checkWinner(checkTurn(newState));
+            if(newState) return checkLoser(checkTurn(newState));
         } 
         else {
             const newState = selectOpponentCard(state, player, card);
-            if(newState) return checkWinner(checkTurn(newState));
+            if(newState) return checkLoser(checkTurn(newState));
         }
     },
 
@@ -213,24 +213,19 @@ function checkTurn(state: GameState): GameState {
     return state;
 }
 
-function checkWinner(state: GameState): GameState {
-    // Game is won when there's only one card left (and it's black peter)
-    let winner: Player|false = false;
+function checkLoser(state: GameState): GameState {
+    // Game is lost by player holding last card (black peter)
+    let cardsInPlay: any[] = [];
 
-    for (const player of state.players) {
-        if(player.cards.length > 1) {
-            // At least one person has multiple cards - game is not won
-            return state;
-        }
-        if(player.cards.length === 1 && player.cards[0].type === CardType.BP) {
-            winner = player;
-        }
-    }
+    state.players.forEach(player => cardsInPlay = [...cardsInPlay, ...player.cards]);
 
-    if(winner) {
+    if(cardsInPlay.length === 1 && cardsInPlay[0].type === CardType.BP) {
+        // game is won
+        // determine which player won
+        const winner = state.players.filter(player => player.cards.length === 1)[0];
         return {
             ...state,
-            winner: winner,
+            winner,
         }
     }
 
