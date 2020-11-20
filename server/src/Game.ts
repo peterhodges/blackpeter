@@ -249,9 +249,23 @@ function getNextPlayer(state: GameState, playerId: number): Player {
 }
 
 function containsPair(cards: Card[]): boolean {
-    // todo: Implement this
-    // How to determine duplicates? Probably need a better data structure for cards...
-    return false;
+
+    // O(n)
+    function countPairs(arr: Card[]): number {
+        let pairs = 0;
+        const obj: any = {};
+        arr.forEach(i => {
+            if (obj[i.type]) {
+                pairs += 1;
+                obj[i.type] = 0;
+            } else {
+                obj[i.type] = 1;
+            }
+        });
+        return pairs;
+    }
+
+    return countPairs(cards) > 0;
 }
 
 function newId(array: {id: number}[]): number {
