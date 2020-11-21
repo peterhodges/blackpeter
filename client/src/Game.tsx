@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { GameState, Card as ICard, Player as IPlayer } from './../../server/src/Game';
 import socketIOClient from 'socket.io-client';
+import {useParams} from "react-router-dom";
 import Player from './Player';
 import './Game.css';
-// @ts-ignore
-const socket = socketIOClient("http://localhost:3000");
+
+let socket: any;
 
 function Game() {
+
+    const { id } = useParams<{id?: string}>();
+
     const [game, setGame] = useState<GameState>();
 
     const newStateHandler = (data: GameState) => setGame(data);
     useEffect(() => {
+        // @ts-ignore
+        socket = socketIOClient(`http://localhost:3000?game=${id}`);   
         socket.on("newState", newStateHandler);
         return () => socket.off("newState", newStateHandler);
     }, []);
@@ -35,6 +41,7 @@ function Game() {
             return (
                 <div className="game">
                     <h1>Black Peter</h1>
+                    <h2>{id}</h2>
                     <div className="game__players">
                         {game.players.map(player => {
                             return (

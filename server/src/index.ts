@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Socket } from 'socket.io';
-import { Game, GameState, PendingGameState } from './Game';
+import { Game, GameState } from './Game';
 
 const app = http.createServer();
 const io = require('socket.io')(app, {
@@ -10,7 +10,8 @@ const io = require('socket.io')(app, {
 });
 
 io.on('connection', (socket: Socket) => {
-    console.log('user connected');
+    // @ts-ignore
+    console.log('user connected', socket.handshake.query.game);
     let state: any;
 
     // todo: Ensure game isn't created if it already exists
