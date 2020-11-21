@@ -15,12 +15,19 @@ function Player({player, turn, selectCardFromPlayer}: Props) {
         selectCardFromPlayer && selectCardFromPlayer(card, player);
     }
 
+    const playerPairs = player.pairs.map(pair => (
+        <div className='player__pair'>
+            <Card key={pair[0].id} card={pair[0]} />
+            <Card key={pair[1].id} card={pair[1]} />
+        </div>
+    ));
+    const playerCards = player.cards.map(card => <Card key={card.id} card={card} selectCard={selectCard} />);
+
     return (
         <div className={turn ? 'player player--turn' : 'player'}>
-            <div className='player__name'>{player.id}: {player.name}</div>
-            <div className='player__cards'>
-                {player.cards.map(card => <Card key={card.id} card={card} selectCard={selectCard} />)}
-            </div>
+            <div className='player__name'>{player.name}</div>
+            <div className='player__cards'>{playerCards}</div>
+            <div className='player__pairs'>{playerPairs}</div>
         </div>
     )
 };

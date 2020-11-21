@@ -14,8 +14,20 @@
     flex-direction: row;
 }
 
-.player__card {
-    
+.player__pairs {
+    display: flex;
+    flex-direction: row;
+}
+
+.player__pair {
+    display: flex;
+    flex-direction: row;
+    margin: 8px
+}
+
+.player__pair .card {
+    font-size: 15px;
+    margin: 2px;
 }
 
 .player--turn {
