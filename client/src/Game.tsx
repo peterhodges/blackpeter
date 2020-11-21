@@ -29,8 +29,8 @@ function Game() {
     }
 
     if(game) {
-        if(game.winner) {
-            return (<div>WINNER: <Player player={game.winner} turn={false} /></div>);
+        if(game.loser) {
+            return (<div>Loser: <Player player={game.loser} turn={false} /></div>);
         } else {
             return (
                 <div className="game">
