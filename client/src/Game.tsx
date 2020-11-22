@@ -5,6 +5,10 @@ import {useParams} from "react-router-dom";
 import Player from './Player';
 import './Game.css';
 
+// todo: import once project structure fixed
+export enum GameStatus { STAGING, PLAYING, PAUSED, FINISHED }
+
+
 let socket: any;
 
 function Game() {
@@ -14,11 +18,27 @@ function Game() {
     const [game, setGame] = useState<GameState>();
 
     const newStateHandler = (data: GameState) => setGame(data);
-    useEffect(() => {
+
+    function connect() {
         // @ts-ignore
-        socket = socketIOClient(`http://localhost:3000?game=${id}`);   
+        socket = socketIOClient(`http://localhost:3000?game=${id}`);
+        let userId = sessionStorage.getItem("userId"); 
+        if(!userId) {
+            userId = Math.random()+""; // todo: use guid
+            sessionStorage.setItem("userId", userId);
+        }  
+        socket.emit("ehlo", userId);
         socket.on("newState", newStateHandler);
-        return () => socket.off("newState", newStateHandler);
+    }
+
+    function disconnect() {
+        socket.disconnect();
+        socket.off("newState", newStateHandler);
+    }
+
+    useEffect(() => {
+        connect();
+        return () => disconnect();
     }, []);
 
     function selectCard(card: ICard, player: IPlayer) {
@@ -31,8 +51,14 @@ function Game() {
 
     function isTurn(player: IPlayer) {
         if(!game) return false;
-        return player.name === game.turn.name;
+        return game.status !== GameStatus.STAGING && player.id === game.turn.id;
     }
+
+    function startGame() {
+        socket.emit("action", {
+            type: "START_GAME",
+        });
+    };
 
     if(game) {
         if(game.loser) {
@@ -40,8 +66,12 @@ function Game() {
         } else {
             return (
                 <div className="game">
-                    <h1>Black Peter</h1>
-                    <h2>{id}</h2>
+                    <h1>Black Peter: {id}</h1>
+                    <div className="game__controls">
+                        <button onClick={() => startGame()}>Start game</button>
+                        <button onClick={() => disconnect()}>Disconnect</button>
+                        <button onClick={() => connect()}>Connect</button>
+                    </div>
                     <div className="game__players">
                         {game.players.map(player => {
                             return (

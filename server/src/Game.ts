@@ -23,20 +23,24 @@ const Deck: Card[] = [
 
 
 export interface Player {
-    id: number;
+    id: string;
     name: string;
+    connected: boolean;
     cards: Card[];
     pairs: Card[][];
 }
 
 export interface PendingPlayer {
-    id: number;
+    id: string;
     name: string;
+    connected: boolean;
 }
+
+export enum GameStatus { STAGING, PLAYING, PAUSED, FINISHED }
 
 export interface GameState {
     id: string;
-    started: boolean;
+    status: GameStatus;
     turn: Player & {pickedCard: boolean};
     players: Player[];
     loser?: Player;
@@ -45,6 +49,7 @@ export interface GameState {
 export interface PendingGameState {
     id: string;
     players: PendingPlayer[];
+    status: GameStatus;
 }
 
 export const Game = {
@@ -52,20 +57,80 @@ export const Game = {
         return {
             id,
             players: [],
+            status: GameStatus.STAGING,
         }
     },
 
-    addPlayer: (state: PendingGameState, name: string): PendingGameState => {
+    connectPlayer: (state: GameState | PendingGameState, name: string, id: string): GameState | PendingGameState => {        
+        if(isGame(state) && findPlayer(state, id)) {
+            const newState = {
+                ...state,
+                players: state.players.map(player => {
+                    // Mark player as connected
+                    if(player.id === id) {
+                        return {
+                            ...player,
+                            connected: true,
+                        }
+                    }
+                    return player;
+                }),
+                // Resume game if possible
+                status: state.players.find(player => !player.connected) ? GameStatus.PLAYING : state.status,
+            };
+
+            return newState;
+        }
+
+        // Player doesn't exist yet so add them
+        return Game.addPlayer(state, name, id);
+    },
+
+    disconnectPlayer: (state: GameState | PendingGameState, id: string): GameState | PendingGameState => {
+        if(isGame(state) && state.status === GameStatus.PLAYING) {
+            // Disable player
+            return {
+                ...state,
+                status: GameStatus.PAUSED,
+                players: state.players.map(player => {
+                    if(player.id === id) {
+                        return {
+                            ...player,
+                            connected: false,
+                        }
+                    }
+                    return player;
+                })
+            };
+        }
+
+        // Remove player
+        return Game.removePlayer(state, id);
+    },
+
+    addPlayer: (state: PendingGameState, name: string, id: string): PendingGameState => {
+        // Ensure player doesn't already exist
+        const existingPlayer = state.players.find(player => player.id === id);
+        if(existingPlayer) return state;
+
         return {
             ...state,
             players: [
                 ...state.players,
                 {
-                    id: newId(state.players),
+                    id,
                     name,
+                    connected: true,
                 }
             ]
         }
+    },
+
+    removePlayer: (state: PendingGameState | GameState, id: string): PendingGameState | GameState => {
+        return {
+            ...state,
+            players: state.players.filter(player => player.id !== id),
+        };
     },
 
     start: (state: PendingGameState): GameState => {
@@ -84,7 +149,7 @@ export const Game = {
 
         newState = {
             ...state,
-            started: true,
+            status: GameStatus.PLAYING,
             players: state.players.map(player => initCards(player)),
             turn: {...initCards(state.players[0]), pickedCard: false}
         }
@@ -94,7 +159,6 @@ export const Game = {
     },
 
     selectCard: (state: GameState, player: Player, card: Card) =>  {
-        // todo: Support player turns
         if(player.id === state.turn.id) {
             // Player selecting own cards
             const newState = layCard(state, player, card);
@@ -231,7 +295,7 @@ function checkLoser(state: GameState): GameState {
     return state;
 }
 
-function getNextPlayer(state: GameState, playerId: number): Player {
+function getNextPlayer(state: GameState, playerId: string): Player {
     // Find index of player
     const index = state.players.findIndex(player => player.id === playerId);
     if(index > -1) {
@@ -240,6 +304,10 @@ function getNextPlayer(state: GameState, playerId: number): Player {
         return state.players[newIndex];
     }
     throw new Error("Could not find next player");
+}
+
+function findPlayer (state: GameState|PendingGameState, id: string): Player|PendingPlayer|undefined  {
+    return state.players.find(player => player.id === id);
 }
 
 function containsPair(cards: Card[]): boolean {
@@ -262,6 +330,4 @@ function containsPair(cards: Card[]): boolean {
     return countPairs(cards) > 0;
 }
 
-function newId(array: {id: number}[]): number {
-    return array.reduce((acc: number, curr: {id:number}) => acc === curr.id ? acc + 1 : acc, 0);
-}
+function isGame(v: any): v is GameState { return (v as GameState).status !== GameStatus.STAGING; }
