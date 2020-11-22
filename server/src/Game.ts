@@ -158,8 +158,9 @@ export const Game = {
         return newState;
     },
 
-    selectCard: (state: GameState, player: Player, card: Card): GameState | undefined =>  {
+    selectCard: (state: GameState, userId: string, player: Player, card: Card): GameState | undefined =>  {
         if(state.status !== GameStatus.PLAYING) return;
+        if(state.turn.id !== userId) return;
 
         if(player.id === state.turn.id) {
             // Player selecting own cards
@@ -174,6 +175,20 @@ export const Game = {
         return;
     },
 
+    setName: (state: PendingGameState, userId: string, name: string) => {
+        return {
+            ...state,
+            players: state.players.map(player => {
+                if(player.id === userId) {
+                    return {
+                        ...player,
+                        name: name
+                    }
+                }
+                return player
+            })
+        }
+    }
 }
 
 function dealCards(state: GameState, deck: Card[]): GameState {

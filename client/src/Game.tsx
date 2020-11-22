@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, SyntheticEvent } from 'react';
 import { GameState, Card as ICard, Player as IPlayer } from './../../server/src/Game';
 import socketIOClient from 'socket.io-client';
 import {useParams} from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
 import Player from './Player';
 import './Game.css';
 
@@ -14,19 +15,25 @@ let socket: any;
 function Game() {
 
     const { id } = useParams<{id?: string}>();
-
     const [game, setGame] = useState<GameState>();
-
+    const [displayUserId, setDisplayUserId] = useState<string>("");
     const newStateHandler = (data: GameState) => setGame(data);
+    let userId = "";
 
     function connect() {
         // @ts-ignore
-        socket = socketIOClient(`http://localhost:3000?game=${id}`);
-        let userId = sessionStorage.getItem("userId"); 
-        if(!userId) {
-            userId = Math.random()+""; // todo: use guid
-            sessionStorage.setItem("userId", userId);
-        }  
+        socket = socketIOClient(`http://192.168.0.5:3000?game=${id}`);
+        const sessionUserId = sessionStorage.getItem("userId"); 
+        const guid = uuidv4();
+
+        if(sessionUserId) {
+            userId = sessionUserId;
+        } else {
+            sessionStorage.setItem("userId", guid);
+            userId = guid;
+        }
+        setDisplayUserId(userId);
+
         socket.emit("ehlo", userId);
         socket.on("newState", newStateHandler);
     }
@@ -60,6 +67,22 @@ function Game() {
         return game.status !== GameStatus.STAGING && player.id === game.turn.id;
     }
 
+    function isUser(player: IPlayer) {
+        return player.id === displayUserId;
+    }
+
+    let timeout: any;
+    function changeName(event: any) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            socket.emit("action", {
+                type: "SET_NAME",
+                name: event.target.value,
+                userId: displayUserId,
+            });    
+        }, 600);
+    }
+
     function startGame() {
         socket.emit("action", {
             type: "START_GAME",
@@ -75,12 +98,13 @@ function Game() {
                     <button onClick={() => newGame()}>New game</button>
                     <button onClick={() => disconnect()}>Disconnect</button>
                     <button onClick={() => connect()}>Connect</button>
+                    <input onChange={(event) => changeName(event)}></input>
                 </div>
                 <div className="game">
                     <div className="game__players">
                         {game.players.map(player => {
                             return (
-                                <Player player={player} key={player.id} turn={isTurn(player)} selectCardFromPlayer={selectCard} />
+                                <Player player={player} key={player.id} me={isUser(player)} turn={isTurn(player)} selectCardFromPlayer={selectCard} />
                             )
                         })}
                     </div>

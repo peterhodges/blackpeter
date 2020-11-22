@@ -8,9 +8,10 @@ enum CardType { A, B, C, D, E, F, BP};
 interface Props {
     card: ICard;
     selectCard?: (card: ICard) => void;
+    show?: boolean;
 }
 
-function Card({card, selectCard}: Props) {
+function Card({card, selectCard, show=true}: Props) {
     
     const [displayCard, setDisplayCard] = useState("");
     
@@ -45,7 +46,7 @@ function Card({card, selectCard}: Props) {
     }
 
     return (
-        <div className="card" onClick={handleClick}>{displayCard}</div>
+        <div className="card" onClick={handleClick}>{show ? displayCard : "x"}</div>
     );
 }
 

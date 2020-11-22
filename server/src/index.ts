@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { Socket } from 'socket.io';
-import { Game, GameState, PendingGameState } from './Game';
+import { Game, GameState, GameStatus, PendingGameState } from './Game';
 
 interface SocketWithData extends Socket {
   userId: string;
@@ -23,14 +23,15 @@ io.on('connection', (socket: SocketWithData) => {
 
     socket.on('ehlo', (id: string, gameId?: string) => {
       socket.userId = id;
-    
+  
       if(!state) {
         state = Game.create("10000");
       }
-  
-      state = Game.connectPlayer(state, "<PLAYER_NAME>", id);
 
-      pushState(state);
+      // todo: prevent users joining started game unless they are a disconnected player
+        state = Game.connectPlayer(state, "<PLAYER_NAME>", id);
+        pushState(state);
+ 
     });
     socket.on('disconnect', () => {  
       if(state) {
@@ -45,9 +46,15 @@ io.on('connection', (socket: SocketWithData) => {
 
           state = Game.create(state.id);
           previousPlayers.forEach(player => {
-            state = Game.addPlayer(state, player.name, player.id);
+            if(player.connected) {
+              state = Game.addPlayer(state, player.name, player.id);
+            }
           });
           console.log("NEW_GAME", state);
+          pushState(state);
+          break;
+        case "SET_NAME":
+          state = Game.setName(state, action.userId, action.name);
           pushState(state);
           break;
         case "START_GAME":
@@ -56,7 +63,7 @@ io.on('connection', (socket: SocketWithData) => {
           break
         case "SELECT_CARD":
           // @ts-ignore
-          const newState = Game.selectCard(state, action.player, action.card);
+          const newState = Game.selectCard(state, socket.userId, action.player, action.card);
           if(newState) {
             state = newState;
             pushState(state);

@@ -7,10 +7,11 @@ import './Player.css';
 interface Props {
     player: IPlayer;
     turn: boolean;
+    me?: boolean;
     selectCardFromPlayer?: (card: ICard, player: IPlayer) => void;
 }
 
-function Player({player, turn, selectCardFromPlayer}: Props) {
+function Player({player, turn, selectCardFromPlayer, me}: Props) {
 
     function selectCard(card: ICard) {
         selectCardFromPlayer && selectCardFromPlayer(card, player);
@@ -20,7 +21,6 @@ function Player({player, turn, selectCardFromPlayer}: Props) {
         let classNames = "player";
         if(turn) classNames += " player--turn";
         if(!player.connected) classNames += " player--disconnected";
-        console.log(classNames);
         return classNames;
     }
 
@@ -30,11 +30,11 @@ function Player({player, turn, selectCardFromPlayer}: Props) {
             <Card card={pair[1]} />
         </div>
     ));
-    const playerCards = player.cards && player.cards.map(card => <Card key={card.id} card={card} selectCard={selectCard} />);
+    const playerCards = player.cards && player.cards.map(card => <Card key={card.id} card={card} selectCard={selectCard} show={me} />);
 
     return (
         <div className={getClassNames()}>
-            <div className='player__name'>{player.id}: {player.name}: {JSON.stringify(player.connected)}</div>
+            <div className='player__name'>{player.id.substr(0, 3)}: {player.name}: {JSON.stringify(player.connected)}</div>
             <div className='player__cards'>{playerCards}</div>
             <div className='player__pairs'>{playerPairs}</div>
         </div>
