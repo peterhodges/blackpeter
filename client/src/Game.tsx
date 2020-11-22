@@ -49,6 +49,12 @@ function Game() {
         });
     }
 
+    function newGame() {
+        socket.emit("action", {
+            type: "NEW_GAME",
+        });
+    }
+
     function isTurn(player: IPlayer) {
         if(!game) return false;
         return game.status !== GameStatus.STAGING && player.id === game.turn.id;
@@ -61,17 +67,16 @@ function Game() {
     };
 
     if(game) {
-        if(game.loser) {
-            return (<div>Loser: <Player player={game.loser} turn={false} /></div>);
-        } else {
-            return (
+        return (
+            <>
+                <h1>Black Peter: {id}</h1>
+                <div className="game__controls">
+                    <button onClick={() => startGame()} disabled={game.status === GameStatus.PLAYING}>Start game</button>
+                    <button onClick={() => newGame()}>New game</button>
+                    <button onClick={() => disconnect()}>Disconnect</button>
+                    <button onClick={() => connect()}>Connect</button>
+                </div>
                 <div className="game">
-                    <h1>Black Peter: {id}</h1>
-                    <div className="game__controls">
-                        <button onClick={() => startGame()}>Start game</button>
-                        <button onClick={() => disconnect()}>Disconnect</button>
-                        <button onClick={() => connect()}>Connect</button>
-                    </div>
                     <div className="game__players">
                         {game.players.map(player => {
                             return (
@@ -80,9 +85,10 @@ function Game() {
                         })}
                     </div>
                 </div>
-                
-            );
-        }
+                {game.loser && <div>Loser: <Player player={game.loser} turn={false} /></div>}
+            </>
+        )
+
     } else {
         return (<div>Loading game...</div>);
     }

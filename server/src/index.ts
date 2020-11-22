@@ -40,6 +40,16 @@ io.on('connection', (socket: SocketWithData) => {
     });
     socket.on("action", action => {
       switch(action.type) {
+        case "NEW_GAME": 
+          const previousPlayers = [...state.players];
+
+          state = Game.create(state.id);
+          previousPlayers.forEach(player => {
+            state = Game.addPlayer(state, player.name, player.id);
+          });
+          console.log("NEW_GAME", state);
+          pushState(state);
+          break;
         case "START_GAME":
           state = Game.start(state);
           pushState(state);

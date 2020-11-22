@@ -158,7 +158,9 @@ export const Game = {
         return newState;
     },
 
-    selectCard: (state: GameState, player: Player, card: Card) =>  {
+    selectCard: (state: GameState, player: Player, card: Card): GameState | undefined =>  {
+        if(state.status !== GameStatus.PLAYING) return;
+
         if(player.id === state.turn.id) {
             // Player selecting own cards
             const newState = layCard(state, player, card);
@@ -168,6 +170,8 @@ export const Game = {
             const newState = selectOpponentCard(state, player, card);
             if(newState) return checkLoser(checkTurn(newState));
         }
+
+        return;
     },
 
 }
